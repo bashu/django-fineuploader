@@ -1,0 +1,4 @@
+django<2.0
+django-appconf
+easy_thumbnails
+pathlib

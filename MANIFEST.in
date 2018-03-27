@@ -1,0 +1,5 @@
+include AUTHORS
+include README.rst
+include LICENSE
+recursive-include photouploader/*/templates *.html
+recursive-include photouploader/*/static *.css *.js *.gif
