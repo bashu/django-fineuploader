@@ -1,0 +1,4 @@
+django<2.0
+django-appconf
+pathlib
+pillow
