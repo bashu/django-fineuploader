@@ -32,8 +32,8 @@ ALLOWED_HOSTS = []
 # Application definition
 
 PROJECT_APPS = [
-    'photouploader',
-    'photouploader.ajaxuploader',
+    'fineuploader',
+    'fineuploader.ajaxuploader',
 ]
 
 INSTALLED_APPS = [

@@ -9,7 +9,7 @@ from setuptools import setup, find_packages
 
 # When creating the sdist, make sure the django.mo file also exists:
 if 'sdist' in sys.argv or 'develop' in sys.argv:
-    os.chdir('photouploader')
+    os.chdir('fineuploader')
 
     try:
         from django.core import management
@@ -35,8 +35,8 @@ def find_version(*parts):
 
 
 setup(
-    name='django-photouploader',
-    version=find_version('photouploader', '__init__.py'),
+    name='django-fineuploader',
+    version=find_version('fineuploader', '__init__.py'),
     license='BSD License, Version 3.0',
 
     install_requires=[
@@ -54,8 +54,8 @@ setup(
     author='Basil Shubin',
     author_email='basil.shubin@gmail.com',
 
-    url='https://github.com/bashu/django-photouploader',
-    download_url='https://github.com/bashu/django-photouploader/zipball/master',
+    url='https://github.com/bashu/django-fineuploader',
+    download_url='https://github.com/bashu/django-fineuploader/zipball/master',
 
     packages=find_packages(exclude=('example*',)),
     include_package_data=True,

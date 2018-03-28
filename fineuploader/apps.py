@@ -4,7 +4,7 @@ from django.apps import AppConfig as DefaultAppConfig
 
 
 class AppConfig(DefaultAppConfig):
-    name = 'photouploader'
+    name = 'fineuploader'
 
     def ready(self):
         # Ensure everything below is only ever run once
