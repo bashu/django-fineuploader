@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 from .ajaxuploader.views import AjaxFileUploader
-from .backends import LocalUploadBackend
+from .backends import FineUploadBackend
 
+logger = logging.getLogger(__name__)
 
-class FineUploaderView(AjaxFileUploader):
-
-    def __init__(self, backend=None, **kwargs):
-        if backend is None:
-            backend = LocalUploadBackend
-        self.get_backend = lambda: backend(**kwargs)
+request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
