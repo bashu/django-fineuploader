@@ -8,7 +8,7 @@ from django.db import models
 from django.utils import timezone
 from django.core.urlresolvers import get_callable
 
-# from django.core.files import File
+from django.core.files import File
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
@@ -74,6 +74,12 @@ class Temporary(models.Model):
             return True
         else:
             return False
+
+    def as_file(self):
+        class TemporaryFile(File):
+            uuid = str(self.uuid)
+
+        return TemporaryFile(self.file_obj, self.original_filename)
 
     def delete(self, *args, **kwargs):
         if self.file_obj and self.file_obj.storage.exists(self.file_obj.name):
