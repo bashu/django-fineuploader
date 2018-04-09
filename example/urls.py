@@ -22,6 +22,7 @@ from django.conf import settings
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^fineuploader/', include('fineuploader.urls')),
 ]
 
 if settings.SERVE_MEDIA:
@@ -39,6 +40,9 @@ if settings.SERVE_MEDIA:
         }),
     ]
 
+from .views import ExampleView, ExistingFileExampleView
+
 urlpatterns += [
-    # ...
+    url(r'^$', ExampleView.as_view(), name='example'),
+    url(r'^(?P<formid>[0-9a-f-]+)/$', ExistingFileExampleView.as_view(), name='existing_file_example'),
 ]

@@ -1,5 +1,7 @@
 include AUTHORS
 include README.rst
 include LICENSE
+recursive-include fineuploader/templates *.html
 recursive-include fineuploader/*/templates *.html
+recursive-include fineuploader/static *.css *.js *.gif
 recursive-include fineuploader/*/static *.css *.js *.gif
