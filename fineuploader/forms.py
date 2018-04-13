@@ -3,8 +3,7 @@
 import uuid
 
 from django import forms
-from django.utils import six
-from django.core.files import File
+from django.contrib.contenttypes.models import ContentType
 
 from attachments.models import Attachment
 
@@ -34,13 +33,6 @@ class FineFormMixin(object):
             
             self.fields[f].widget.target_object = self.get_target_object(formid, f)
 
-    def _as_file(self, attachment):
-        class AttachmentFile(File):
-            content_type = attachment.content_type,
-            object_id = attachment.pk
-        
-        return AttachmentFile(attachment.attachment_file, attachment.filename)
-
     def get_target_object(self, formid=None, field_name=None):
         if hasattr(self, 'instance') is True:
             if getattr(self.instance, 'pk', False):
@@ -55,29 +47,18 @@ class FineFormMixin(object):
 
         raise NotImplementedError
 
-    def full_clean(self):
-        if not self.is_bound:
-            super(FineFormMixin, self).full_clean()
-        else:
-            formid = self.data.get(self.formid_field_name, self.initial.get(self.formid_field_name))
-            for field_name, f in six.iteritems(self.fields):
-                if not isinstance(self.fields[field_name], FineFileField):
-                    continue
-                target_object = self.get_target_object(formid, field_name)
-
-                self.files[field_name] = [
-                    self._as_file(a) for a in Attachment.objects.attachments_for_object(target_object)
-                ]
-
-            super(FineFormMixin, self).full_clean()
-
-    def handle_uploads(self, *args, **kwargs):
+    def handle_uploads(self, target_object, *args, **kwargs):
         for f in self.fields:
             if not isinstance(self.fields[f], FineFileField):
                 continue
-            
-            for file_obj in self.cleaned_data[f]:
-                self.save_file(file_obj, f, *args, **kwargs)
 
-    def save_file(self, file_obj, field_name, *args, **kwargs):
-        raise NotImplementedError
+            for a in self.cleaned_data[f]:
+                self.save_attachment(target_object, a, f, *args, **kwargs)
+
+    def save_attachment(self, target_object, attachment, field_name, *args, **kwargs):
+        attachment.content_type_id = ContentType.objects.get_for_model(
+            target_object).pk
+        attachment.object_id = target_object.pk
+        attachment.save()
+
+        return attachment
