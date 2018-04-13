@@ -8,9 +8,10 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 
+from attachments.models import Attachment
+
 from .ajaxuploader.views import AjaxFileUploader
-from .backends import FineUploadBackend
-from .models import Temporary
+from .backends import FineUploadBackend, get_target_object
 
 request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
 
@@ -18,19 +19,17 @@ request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
 # TODO: replace with class-based view
 def session_endpoint(request, *args, **kwargs):
     if request.method == "GET":
-        params = {
-            'formid': request.GET['formid'],
-        }
+        try:
+            target_object = get_target_object(request, request.GET)
+        except Exception, e:
+            return HttpResponse(json.dumps(unicode(e), cls=DjangoJSONEncoder), content_type="text/html; charset=utf-8", status=400)
 
-        if request.GET.get('field_name'):
-            params['field_name'] = request.GET.get('field_name')
-        
         response = []
-        for t in Temporary.objects.filter(**params).order_by('timestamp'):
+        for a in Attachment.objects.attachments_for_object(target_object):
             response.append({
-                'name': unicode(t),
-                'uuid': str(t.uuid),
-                'size': t.file_obj.size,
+                'name': a.filename,
+                'uuid': a.pk,
+                'size': a.attachment_file.size,
             })
 
         # although "application/json" is the correct content type, IE throws a fit
@@ -43,7 +42,13 @@ def session_endpoint(request, *args, **kwargs):
 def delete_endpoint(request, *args, **kwargs):
     if request.method == "POST":
         try:
-            Temporary.objects.get(uuid=request.POST['qquuid']).delete()
+            target_object = get_target_object(request, request.POST)
+        except Exception, e:
+            return HttpResponse(json.dumps({unicode(e)}, cls=DjangoJSONEncoder), content_type="text/html; charset=utf-8", status=400)
+
+        try:
+            Attachment.objects.attachments_for_object(target_object).get(
+                pk=request.POST['qquuid']).delete()
         except ObjectDoesNotExist, e:
             raise Http404
 
