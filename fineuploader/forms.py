@@ -4,6 +4,9 @@ import uuid
 
 from django import forms
 from django.utils import six
+from django.core.files import File
+
+from attachments.models import Attachment
 
 from .models import Temporary
 from .formfields import FineFileField
@@ -24,25 +27,47 @@ class FineFormMixin(object):
         self.fields[self.formid_field_name] = forms.CharField(
             widget=forms.HiddenInput, initial=kwargs['initial'][self.formid_field_name], required=False)
 
+        formid = self.data.get(self.formid_field_name, self.initial.get(self.formid_field_name))
         for f in self.fields:
             if not isinstance(self.fields[f], FineFileField):
                 continue
             
-            self.fields[f].formid_field_name = self.formid_field_name
+            self.fields[f].widget.target_object = self.get_target_object(formid, f)
+
+    def _as_file(self, attachment):
+        class AttachmentFile(File):
+            content_type = attachment.content_type,
+            object_id = attachment.pk
+        
+        return AttachmentFile(attachment.attachment_file, attachment.filename)
+
+    def get_target_object(self, formid=None, field_name=None):
+        if hasattr(self, 'instance') is True:
+            if getattr(self.instance, 'pk', False):
+                return self.instance
+
+        # instance not found, trying to get temporary object...
+        if formid and field_name:
+            t, created = Temporary.objects.get_or_create(
+                formid=formid, field_name=field_name)
+
+            return t
+
+        raise NotImplementedError
 
     def full_clean(self):
         if not self.is_bound:
             super(FineFormMixin, self).full_clean()
         else:
             formid = self.data.get(self.formid_field_name, self.initial.get(self.formid_field_name))
-            if bool(formid) is True:
-                for field_name, f in six.iteritems(self.fields):
-                    if not isinstance(self.fields[field_name], FineFileField):
-                        continue
-                    self.files[field_name] = [
-                        f.as_file() for f in Temporary.objects.filter(
-                            formid=formid, field_name=field_name)
-                    ]
+            for field_name, f in six.iteritems(self.fields):
+                if not isinstance(self.fields[field_name], FineFileField):
+                    continue
+                target_object = self.get_target_object(formid, field_name)
+
+                self.files[field_name] = [
+                    self._as_file(a) for a in Attachment.objects.attachments_for_object(target_object)
+                ]
 
             super(FineFormMixin, self).full_clean()
 
