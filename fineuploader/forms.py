@@ -3,9 +3,7 @@
 import uuid
 
 from django import forms
-from django.contrib.contenttypes.models import ContentType
-
-from attachments.models import Attachment
+from django.utils import six
 
 from .models import Temporary
 from .formfields import FineFileField
@@ -31,34 +29,15 @@ class FineFormMixin(object):
             if not isinstance(self.fields[f], FineFileField):
                 continue
             
-            self.fields[f].widget.target_object = self.get_target_object(formid, f)
+            self.fields[f].formid_field_name = self.formid_field_name
 
-    def get_target_object(self, formid=None, field_name=None):
-        if hasattr(self, 'instance') is True:
-            if getattr(self.instance, 'pk', False):
-                return self.instance
-
-        # instance not found, trying to get temporary object...
-        if formid and field_name:
-            t, created = Temporary.objects.get_or_create(
-                formid=formid, field_name=field_name)
-
-            return t
-
-        raise NotImplementedError
-
-    def handle_uploads(self, target_object, *args, **kwargs):
+    def handle_uploads(self, *args, **kwargs):
         for f in self.fields:
             if not isinstance(self.fields[f], FineFileField):
                 continue
 
-            for a in self.cleaned_data[f]:
-                self.save_attachment(target_object, a, f, *args, **kwargs)
+            for file_obj in self.cleaned_data[f]:
+                self.save_file(file_obj, f, *args, **kwargs)
 
-    def save_attachment(self, target_object, attachment, field_name, *args, **kwargs):
-        attachment.content_type_id = ContentType.objects.get_for_model(
-            target_object).pk
-        attachment.object_id = target_object.pk
-        attachment.save()
-
-        return attachment
+    def save_file(self, file_obj, field_name, *args, **kwargs):
+        raise NotImplementedError

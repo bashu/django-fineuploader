@@ -11,16 +11,16 @@
                     endpoint: this.getAttribute("data-request-endpoint"),
                     params: {
                         'csrfmiddlewaretoken': $(form).find("[name=csrfmiddlewaretoken]").val(),
-                        'content_type': this.getAttribute("data-ct"),
-                        'object_id': this.getAttribute("data-oid")
+                        'formid': $(form).find("[name=" + $(element).attr("data-formid") + "]").val(),
+                        'field_name': $(element).find("input[type=file]").attr("name")
                     }
                 },
                 session: {
                     endpoint: this.getAttribute("data-session-endpoint"),
                     params: {
                         'csrfmiddlewaretoken': $(form).find("[name=csrfmiddlewaretoken]").val(),
-                        'content_type': this.getAttribute("data-ct"),
-                        'object_id': this.getAttribute("data-oid")
+                        'formid': $(form).find("[name=" + $(element).attr("data-formid") + "]").val(),
+                        'field_name': $(element).find("input[type=file]").attr("name")
                     }
                 },
                 deleteFile: {
@@ -28,9 +28,7 @@
                     method: "POST",
                     endpoint: this.getAttribute("data-delete-endpoint"),
                     params: {
-                        'csrfmiddlewaretoken': $(form).find("[name=csrfmiddlewaretoken]").val(),
-                        'content_type': this.getAttribute("data-ct"),
-                        'object_id': this.getAttribute("data-oid")
+                        'csrfmiddlewaretoken': $(form).find("[name=csrfmiddlewaretoken]").val()
                     }
                 },
                 multiple: true,

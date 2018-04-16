@@ -29,6 +29,6 @@
     </ul>
   </div>
 </script>
-<div class="fineuploader" data-element="{{ widget.attrs.id }}_placeholder" data-request-endpoint="{% url 'request_endpoint' %}" data-session-endpoint="{% url 'session_endpoint' %}" data-delete-endpoint="{% url 'delete_endpoint' %}" data-ct="{{ widget.content_type.pk }}" data-oid="{{ widget.object.pk }}" data-fileLimit="{{ widget.options.fileLimit }}" data-sizeLimit="{{ widget.options.sizeLimit }}">
+<div class="fineuploader" data-element="{{ widget.attrs.id }}_placeholder" data-request-endpoint="{% url 'request_endpoint' %}" data-session-endpoint="{% url 'session_endpoint' %}" data-delete-endpoint="{% url 'delete_endpoint' %}" data-formid="{{ widget.formid_field_name }}" data-fileLimit="{{ widget.options.fileLimit }}" data-sizeLimit="{{ widget.options.sizeLimit }}">
   <div id="{{ widget.attrs.id }}_placeholder">{% include "django/forms/widgets/input.html" %}</div>
 </div>
