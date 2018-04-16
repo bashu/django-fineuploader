@@ -5,28 +5,12 @@ import logging
 from django.utils import timezone
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import get_callable
-from django.core.exceptions import PermissionDenied
-from django.contrib.contenttypes.models import ContentType
-
-from attachments.models import Attachment
 
 from .ajaxuploader.backends import local as backend
 from .models import Temporary
 from .conf import settings
 
 logger = logging.getLogger(__name__)
-
-
-def get_target_object(request, context):
-    obj = ContentType.objects.get_for_id(
-        context['content_type']).get_object_for_this_type(pk=context['object_id'])
-
-    if isinstance(obj, Temporary):
-        return obj
-
-    # TODO: check for permissions ?
-
-    return obj
 
 
 class LocalUploadBackend(backend.LocalUploadBackend):
@@ -87,32 +71,22 @@ class FineUploadBackend(LocalUploadBackend):
         else:
             original_filename = request.FILES['qqfile'].name
 
-        try:
-            target_object = self.get_target_object(request, request.POST)
+        model_info = {
+            'uuid': request.POST['qquuid'],
+            'formid': request.POST['formid'],
+            'original_filename': original_filename,
+            'timestamp': timezone.localtime(timezone.now()),
+        }
 
-            model_info = {
-                'creator': request.user,
-                'content_type': ContentType.objects.get_for_model(target_object.__class__),
-                'object_id': target_object.pk,
-            }
+        field_name = request.POST.get('field_name')
+        if field_name:
+            model_info['field_name'] = field_name
 
-            a = Attachment(attachment_file=None, **model_info)
+        t = Temporary(**model_info)
 
-            with open(self._path) as fh:
-                a.attachment_file.save(original_filename, ContentFile(fh.read()), save=True)
-            a.save()
+        with open(self._path) as fh:
+            t.file_obj.save(filename, ContentFile(fh.read()), save=True)
 
-            response.update({'newUuid': a.pk})
-
-        except Exception, e:
-            return self.failure(unicode(e), request)
-
-        response.update({
-            'content_type': request.POST['content_type'],
-            'object_id': request.POST['object_id'],
-        })
+        t.save()
 
         return response
-
-    def get_target_object(self, request, context):
-        return get_target_object(request, context)
