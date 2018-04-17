@@ -27,6 +27,38 @@ External dependencies
 Setup
 -----
 
+Add ``fineuploader`` and ``fineuploader.ajaxuploader`` to  ``INSTALLED_APPS``:
+
+.. code-block:: python
+
+    INSTALLED_APPS += (
+        'fineuploader',
+        'fineuploader.ajaxuploader',
+    )
+
+Be sure you have the ``django.template.context_processors.request`` processor
+
+.. code-block:: python
+
+    TEMPLATES = [
+        {
+            ...
+            'OPTIONS': {
+                'context_processors': [
+                    ...
+                    'django.template.context_processors.request',
+                ],
+            },
+        },
+    ]
+
+and include ``fineuploader`` templates
+
+.. code-block:: html+django
+
+    {% include "fineuploader/fineuploader_css.html" %} {# Before the closing head tag #}
+    {% include "fineuploader/fineuploader_js.html" %} {# Before the closing body tag #}
+    
 Usage
 -----
 
