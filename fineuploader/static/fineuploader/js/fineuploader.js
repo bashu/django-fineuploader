@@ -33,6 +33,7 @@
                 },
                 multiple: true,
                 validation: {
+                    acceptFiles: $(element).find("input[type=file]").attr("accept"),
                     itemLimit: this.getAttribute("data-fileLimit"),
                     sizeLimit: this.getAttribute("data-sizeLimit")
                 },
