@@ -8,7 +8,6 @@ from .widgets import FineInput
 
 
 class FineFileField(forms.FileField):
-    formid_field_name = 'formid'
     file_limit, size_limit = 4, 10485760  # 4 files by 10Mb
     widget = FineInput
 
@@ -21,7 +20,6 @@ class FineFileField(forms.FileField):
             self.file_limit = kwargs.pop('size_limit')
         super(FineFileField, self).__init__(*args, **kwargs)
 
-        self.widget.formid_field_name = self.formid_field_name
         self.widget.file_limit = self.file_limit
         self.widget.size_limit = self.size_limit
 

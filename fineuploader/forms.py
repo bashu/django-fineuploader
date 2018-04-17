@@ -14,22 +14,25 @@ class FineFormMixin(object):
     request = None
 
     def __init__(self, *args, **kwargs):
+        if 'prefix' in kwargs and kwargs['prefix'] is not None:
+            self.prefix = kwargs['prefix']
+
         if kwargs.get('initial', None) is None:
             kwargs['initial'] = {}
-        if not self.formid_field_name in kwargs['initial']:
+        if not self.add_prefix(self.formid_field_name) in kwargs['initial']:
             kwargs['initial'].update({
-                self.formid_field_name: str(uuid.uuid4())})
+                self.add_prefix(self.formid_field_name): str(uuid.uuid4())})
         super(FineFormMixin, self).__init__(*args, **kwargs)
 
         self.fields[self.formid_field_name] = forms.CharField(
-            widget=forms.HiddenInput, initial=kwargs['initial'][self.formid_field_name], required=False)
+            widget=forms.HiddenInput, initial=kwargs['initial'][self.add_prefix(self.formid_field_name)], required=False)
 
-        formid = self.data.get(self.formid_field_name, self.initial.get(self.formid_field_name))
+        formid = self.data.get(self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name)))
         for f in self.fields:
             if not isinstance(self.fields[f], FineFileField):
                 continue
             
-            self.fields[f].formid_field_name = self.formid_field_name
+            self.fields[f].widget.formid_field_name = self.add_prefix(self.formid_field_name)
 
     def handle_uploads(self, *args, **kwargs):
         for f in self.fields:
