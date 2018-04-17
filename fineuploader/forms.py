@@ -6,7 +6,7 @@ from django import forms
 from django.utils import six
 
 from .models import Temporary
-from .formfields import FineFileField
+from .formfields import FineFieldMixin
 
 
 class FineFormMixin(object):
@@ -29,14 +29,14 @@ class FineFormMixin(object):
 
         formid = self.data.get(self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name)))
         for f in self.fields:
-            if not isinstance(self.fields[f], FineFileField):
+            if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
             
             self.fields[f].widget.formid_field_name = self.add_prefix(self.formid_field_name)
 
     def handle_uploads(self, *args, **kwargs):
         for f in self.fields:
-            if not isinstance(self.fields[f], FineFileField):
+            if not isinstance(self.fields[f].__class__, FineFieldMixin):
                 continue
 
             for file_obj in self.cleaned_data[f]:
