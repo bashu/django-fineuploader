@@ -47,7 +47,7 @@ setup(
         'Django (>=1.8)',
     ],
 
-    description='Put short description here...',
+    description='Simple Fine Uploader integration for Django',
     long_description=read('README.rst'),
 
     author='Basil Shubin',

@@ -36,7 +36,7 @@ class FineFormMixin(object):
 
     def handle_uploads(self, *args, **kwargs):
         for f in self.fields:
-            if not isinstance(self.fields[f].__class__, FineFieldMixin):
+            if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
 
             for file_obj in self.cleaned_data[f]:
