@@ -6,11 +6,13 @@ from django.views import generic
 
 from fineuploader.forms import FineFormMixin
 from fineuploader.formfields import FineFileField
-from fineuploader.models import Temporary
 
 
 class ExampleForm(FineFormMixin, forms.Form):
     input_file = FineFileField(label="Files")
+
+    def save_file(self, file_obj, field_name, *args, **kwargs):
+        pass
 
 
 class ExampleView(generic.FormView):
@@ -18,9 +20,7 @@ class ExampleView(generic.FormView):
     form_class = ExampleForm
 
     def form_valid(self, form):
-        input_file = form.cleaned_data['input_file']
-
-        # TODO: handle_uploads
+        form.handle_upload()
 
         self.success_url = reverse('existing_file_example', kwargs=dict(formid=str(self.request.POST.get(self.get_form_class().formid_field_name))))
 

@@ -2,12 +2,11 @@
 
 import logging
 
-from django.utils import timezone
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import get_callable
 
 from .ajaxuploader.backends import local as backend
-from .models import Temporary
+from .utils import get_upload_model
 from .conf import settings
 
 logger = logging.getLogger(__name__)
@@ -66,27 +65,17 @@ class FineUploadBackend(LocalUploadBackend):
         response = super(FineUploadBackend, self).upload_complete(
             request, filename, *args, **kwargs)
 
+        try:
+            klass = get_upload_model()
+        except Exception, e:
+            return self.failure(unicode(e), request)
+            
         if request.POST.get('qqfilename'):
             original_filename = request.POST['qqfilename']
         else:
             original_filename = request.FILES['qqfile'].name
 
-        model_info = {
-            'uuid': request.POST['qquuid'],
-            'formid': request.POST['formid'],
-            'original_filename': original_filename,
-            'timestamp': timezone.localtime(timezone.now()),
-        }
-
-        field_name = request.POST.get('field_name')
-        if field_name:
-            model_info['field_name'] = field_name
-
-        t = Temporary(**model_info)
-
         with open(self._path) as fh:
-            t.file_obj.save(filename, ContentFile(fh.read()), save=True)
-
-        t.save()
+            klass.process(original_filename, ContentFile(fh.read()), **dict(request.POST.items()))
 
         return response

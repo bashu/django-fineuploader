@@ -5,8 +5,8 @@ import uuid
 from django import forms
 from django.utils import six
 
-from .models import Temporary
 from .formfields import FineFieldMixin
+from .conf import settings
 
 
 class FineFormMixin(object):
@@ -31,10 +31,11 @@ class FineFormMixin(object):
         for f in self.fields:
             if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
-            
+
+            # TODO: allow to load existing files
             self.fields[f].widget.formid_field_name = self.add_prefix(self.formid_field_name)
 
-    def handle_uploads(self, *args, **kwargs):
+    def handle_upload(self, *args, **kwargs):
         for f in self.fields:
             if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue

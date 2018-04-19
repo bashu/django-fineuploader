@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import uuid
 import inspect
 from datetime import timedelta
 
@@ -12,7 +13,7 @@ from django.core.files import File
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from .managers import TemporaryManager
+from .managers import UploadManager
 from .utils import slugify
 from .conf import settings
 
@@ -35,7 +36,7 @@ def upload_path(instance, filename):
 
 
 @python_2_unicode_compatible
-class Temporary(models.Model):
+class Upload(models.Model):
 
     formid = models.CharField(max_length=128)
     field_name = models.CharField(max_length=256, null=True, blank=True)
@@ -45,11 +46,11 @@ class Temporary(models.Model):
 
     # for internal use...
 
-    uuid = models.UUIDField()
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=True)
 
     timestamp = models.DateTimeField(default=timezone.now)
 
-    objects = TemporaryManager()
+    objects = UploadManager()
 
     class Meta(object):
         verbose_name = _('temporary upload')
@@ -75,14 +76,32 @@ class Temporary(models.Model):
         else:
             return False
 
-    def as_file(self):
-        class TemporaryFile(File):
-            uuid = str(self.uuid)
+    @classmethod
+    def process(self, filename, file_obj, *args, **kwargs):
+        model_info = {
+            'uuid': kwargs['qquuid'],
+            'formid': kwargs['formid'],
+            'original_filename': filename,
+            'timestamp': timezone.localtime(timezone.now()),
+        }
 
-        return TemporaryFile(self.file_obj, self.original_filename)
+        field_name = kwargs.get('field_name')
+        if field_name:
+            model_info['field_name'] = field_name
+
+        obj = Upload(**model_info)
+        obj.file_obj.save(filename, file_obj, save=True)
+        obj.save()
+        
+
+    def as_file(self):
+        class UploadFile(File):
+            uuid = str(self.pk)
+
+        return UploadFile(self.file_obj, self.original_filename)
 
     def delete(self, *args, **kwargs):
         if self.file_obj and self.file_obj.storage.exists(self.file_obj.name):
             self.file_obj.delete()
 
-        super(Temporary, self).delete(*args, **kwargs)
+        super(Upload, self).delete(*args, **kwargs)

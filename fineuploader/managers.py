@@ -3,7 +3,7 @@
 from django.db import models
 
 
-class TemporaryManager(models.Manager):
+class UploadManager(models.Manager):
 
     def try_get(self, **kwargs):
         qs = self.get_queryset().filter(**kwargs)

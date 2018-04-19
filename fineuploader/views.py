@@ -10,7 +10,7 @@ from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 
 from .ajaxuploader.views import AjaxFileUploader
 from .backends import FineUploadBackend
-from .models import Temporary
+from .utils import get_upload_model
 
 request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
 
@@ -26,10 +26,10 @@ def session_endpoint(request, *args, **kwargs):
             params['field_name'] = request.GET.get('field_name')
         
         response = []
-        for t in Temporary.objects.filter(**params).order_by('timestamp'):
+        for t in get_upload_model().objects.filter(**params).order_by('timestamp'):
             response.append({
                 'name': unicode(t),
-                'uuid': str(t.uuid),
+                'uuid': str(t.pk),
                 'size': t.file_obj.size,
             })
 
@@ -43,7 +43,7 @@ def session_endpoint(request, *args, **kwargs):
 def delete_endpoint(request, *args, **kwargs):
     if request.method == "POST":
         try:
-            Temporary.objects.get(uuid=request.POST['qquuid']).delete()
+            get_upload_model().objects.get(pk=request.POST['qquuid']).delete()
         except ObjectDoesNotExist, e:
             raise Http404
 

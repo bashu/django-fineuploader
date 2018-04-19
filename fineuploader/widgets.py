@@ -4,7 +4,7 @@ import json
 
 from django.forms import ClearableFileInput
 
-from .models import Temporary
+from .utils import get_upload_model
 
 
 class FineInput(ClearableFileInput):
@@ -16,7 +16,7 @@ class FineInput(ClearableFileInput):
 
     def render(self, name, value, attrs=None, renderer=None):
         formid_field_name = self.formid_field_name
-
+        
         context = self.get_context(name, value, attrs)
         context['widget'].update({
             'formid_field_name': formid_field_name,
@@ -35,7 +35,7 @@ class FineInput(ClearableFileInput):
         formid = data.get(self.formid_field_name, None)
         if bool(formid) is True:
             return [
-                t.as_file() for t in Temporary.objects.filter(
+                t.as_file() for t in get_upload_model().objects.filter(
                     formid=formid, field_name=name)
             ]
         return None
