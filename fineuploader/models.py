@@ -77,7 +77,7 @@ class Upload(models.Model):
             return False
 
     @classmethod
-    def process(self, filename, file_obj, *args, **kwargs):
+    def process_upload(self, filename, file_obj, *args, **kwargs):
         model_info = {
             'uuid': kwargs['qquuid'],
             'formid': kwargs['formid'],
@@ -92,7 +92,6 @@ class Upload(models.Model):
         obj = Upload(**model_info)
         obj.file_obj.save(filename, file_obj, save=True)
         obj.save()
-        
 
     def as_file(self):
         class UploadFile(File):

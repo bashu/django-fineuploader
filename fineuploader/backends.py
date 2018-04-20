@@ -76,6 +76,7 @@ class FineUploadBackend(LocalUploadBackend):
             original_filename = request.FILES['qqfile'].name
 
         with open(self._path) as fh:
-            klass.process(original_filename, ContentFile(fh.read()), **dict(request.POST.items()))
+            klass.process_upload(
+                original_filename, ContentFile(fh.read()), **dict(request.POST.items()))
 
         return response

@@ -6,6 +6,7 @@ from django import forms
 from django.utils import six
 
 from .formfields import FineFieldMixin
+from .utils import get_upload_model
 from .conf import settings
 
 
@@ -32,8 +33,19 @@ class FineFormMixin(object):
             if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
 
-            # TODO: allow to load existing files
             self.fields[f].widget.formid_field_name = self.add_prefix(self.formid_field_name)
+
+    def delete_temporary_files(self):
+        formid = self.data.get(self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name)))
+
+        if bool(formid) is True:
+            for field_name, f in six.iteritems(self.fields):
+                if not issubclass(self.fields[field_name].__class__, FineFieldMixin):
+                    continue
+
+                for t in get_upload_model().objects.filter(
+                        formid=formid, field_name=field_name):
+                    t.delete()
 
     def handle_upload(self, *args, **kwargs):
         for f in self.fields:
