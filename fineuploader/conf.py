@@ -8,7 +8,6 @@ from appconf import AppConf
 class FineUploaderSettings(AppConf):
     FILENAME_FUNCTION = 'fineuploader.utils.get_valid_filename'
     TEMPORARY_AGE = 60 * 60 * 24 * 7  # default is one week
-    UPLOAD_MODEL = 'fineuploader.Upload'
 
     class Meta:
         prefix = 'fineuploader'

@@ -4,12 +4,26 @@ import logging
 
 from django.core.files.base import ContentFile
 from django.core.urlresolvers import get_callable
+from django.core.exceptions import PermissionDenied
+from django.contrib.contenttypes.models import ContentType
 
 from .ajaxuploader.backends import local as backend
-from .utils import get_upload_model
+from .models import Attachment, Temporary
 from .conf import settings
 
 logger = logging.getLogger(__name__)
+
+
+def get_target_object(request, context):
+    obj = ContentType.objects.get_for_id(
+        context['content_type']).get_object_for_this_type(pk=context['object_id'])
+
+    if isinstance(obj, Temporary):
+        return obj
+
+    # TODO: check for permissions ?
+
+    return obj
 
 
 class LocalUploadBackend(backend.LocalUploadBackend):
@@ -65,18 +79,42 @@ class FineUploadBackend(LocalUploadBackend):
         response = super(FineUploadBackend, self).upload_complete(
             request, filename, *args, **kwargs)
 
-        try:
-            klass = get_upload_model()
-        except Exception, e:
-            return self.failure(unicode(e), request)
-            
         if request.POST.get('qqfilename'):
             original_filename = request.POST['qqfilename']
         else:
             original_filename = request.FILES['qqfile'].name
 
-        with open(self._path) as fh:
-            klass.process_upload(
-                original_filename, ContentFile(fh.read()), **dict(request.POST.items()))
+        try:
+            target_object = self.get_target_object(request, request.POST)
+
+            model_info = {
+                'original_filename': original_filename,
+                'owner': request.user if request.user.is_authenticated else None,
+                'content_type': ContentType.objects.get_for_model(target_object.__class__),
+                'object_id': target_object.pk,
+            }
+            
+            field_name = request.POST.get('field_name')
+            if field_name:
+                model_info['field_name'] = field_name
+
+            a = Attachment(file_obj=None, uuid=request.POST['qquuid'], **model_info)
+
+            with open(self._path) as fh:
+                a.file_obj.save(original_filename, ContentFile(fh.read()), save=True)
+            a.save()
+
+            response.update({'newUuid': a.uuid})
+
+        except Exception, e:
+            return self.failure(unicode(e), request)
+
+        response.update({
+            'content_type': request.POST['content_type'],
+            'object_id': request.POST['object_id'],
+        })
 
         return response
+
+    def get_target_object(self, request, context):
+        return get_target_object(request, context)
