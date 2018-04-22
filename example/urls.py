@@ -40,9 +40,9 @@ if settings.SERVE_MEDIA:
         }),
     ]
 
-from .views import ExampleView, ExistingFileExampleView
+from .views import ExampleCreateView, ExampleUpdateView
 
 urlpatterns += [
-    url(r'^$', ExampleView.as_view(), name='example'),
-    url(r'^(?P<formid>[0-9a-f-]+)/$', ExistingFileExampleView.as_view(), name='existing_file_example'),
+    url(r'^$', ExampleCreateView.as_view(), name='example_create'),
+    url(r'^(?P<pk>[0-9a-f-]+)/$', ExampleUpdateView.as_view(), name='example_edit'),
 ]
