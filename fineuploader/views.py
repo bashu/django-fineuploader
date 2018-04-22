@@ -9,8 +9,8 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse, Http404, HttpResponseNotAllowed
 
 from .ajaxuploader.views import AjaxFileUploader
-from .backends import FineUploadBackend
-from .models import Temporary
+from .backends import FineUploadBackend, get_target_object
+from .models import Attachment
 
 request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
 
@@ -18,19 +18,24 @@ request_endpoint = AjaxFileUploader(backend=FineUploadBackend)
 # TODO: replace with class-based view
 def session_endpoint(request, *args, **kwargs):
     if request.method == "GET":
+        try:
+            target_object = get_target_object(request, request.GET)
+        except Exception, e:
+            return HttpResponse(json.dumps(unicode(e), cls=DjangoJSONEncoder), content_type="text/html; charset=utf-8", status=400)
+
         params = {
-            'formid': request.GET['formid'],
+            'obj': target_object
         }
 
         if request.GET.get('field_name'):
             params['field_name'] = request.GET.get('field_name')
         
         response = []
-        for t in Temporary.objects.filter(**params).order_by('timestamp'):
+        for a in Attachment.objects.for_object(**params):
             response.append({
-                'name': unicode(t),
-                'uuid': str(t.uuid),
-                'size': t.file_obj.size,
+                'name': str(a),
+                'uuid': str(a.uuid),
+                'size': a.file_obj.size,
             })
 
         # although "application/json" is the correct content type, IE throws a fit
@@ -43,7 +48,19 @@ def session_endpoint(request, *args, **kwargs):
 def delete_endpoint(request, *args, **kwargs):
     if request.method == "POST":
         try:
-            Temporary.objects.get(uuid=request.POST['qquuid']).delete()
+            target_object = get_target_object(request, request.POST)
+        except Exception, e:
+            return HttpResponse(json.dumps({unicode(e)}, cls=DjangoJSONEncoder), content_type="text/html; charset=utf-8", status=400)
+
+        params = {
+            'obj': target_object
+        }
+
+        if request.GET.get('field_name'):
+            params['field_name'] = request.GET.get('field_name')
+
+        try:
+            Attachment.objects.for_object(**params).get(uuid=request.POST['qquuid']).delete()
         except ObjectDoesNotExist, e:
             raise Http404
 

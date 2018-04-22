@@ -52,6 +52,14 @@ Be sure you have the ``django.template.context_processors.request`` processor
         },
     ]
 
+Update your ``urls.py`` file:
+
+.. code-block:: python
+
+    urlpatterns += [
+        url(r'^fineuploader/', include('fineuploader.urls')),
+    ]
+    
 and include ``fineuploader`` templates
 
 .. code-block:: html+django
@@ -59,6 +67,12 @@ and include ``fineuploader`` templates
     {% include "fineuploader/fineuploader_css.html" %} {# Before the closing head tag #}
     {% include "fineuploader/fineuploader_js.html" %} {# Before the closing body tag #}
     
+When deploying on production server, don't forget to run:
+
+.. code-block:: shell
+
+    python manage.py collectstatic
+
 Usage
 -----
 

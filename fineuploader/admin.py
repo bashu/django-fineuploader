@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 
 from django.contrib import admin
+from django.contrib.contenttypes.admin import GenericStackedInline
 
-from .models import Temporary
+from .models import Attachment
 
 
-@admin.register(Temporary)
-class TemporaryAdmin(admin.ModelAdmin):
-    list_display = ['original_filename', 'timestamp']
-    readonly_fields = ['formid', 'field_name', 'timestamp']
-    date_hierarchy = 'timestamp'
+class AttachmentInlines(GenericStackedInline):
+    model = Attachment
+    exclude = ()
+    extra = 1
+
+
+@admin.register(Attachment)
+class AttachmentAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'content_object', 'timestamp')
+    list_filter = ('content_type',)
+    readonly_fields = ('uuid', 'field_name', 'timestamp')

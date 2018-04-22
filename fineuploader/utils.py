@@ -5,6 +5,8 @@ import pathlib
 
 from django.utils.text import slugify as default_slugify
 
+from .conf import settings
+
 slugify = lambda x: default_slugify(x).lower().strip()
 
 def parse_filename(filename):

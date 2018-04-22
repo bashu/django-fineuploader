@@ -3,8 +3,9 @@
 import json
 
 from django.forms import ClearableFileInput
+from django.contrib.contenttypes.models import ContentType
 
-from .models import Temporary
+from .models import Attachment
 
 
 class FineInput(ClearableFileInput):
@@ -15,15 +16,16 @@ class FineInput(ClearableFileInput):
         super(FineInput, self).__init__(attrs)
 
     def render(self, name, value, attrs=None, renderer=None):
-        formid_field_name = self.formid_field_name
-
+        target_object = self.target_object
+        
         context = self.get_context(name, value, attrs)
         context['widget'].update({
-            'formid_field_name': formid_field_name,
             'options': {
                 'fileLimit': self.file_limit,
                 'sizeLimit': self.size_limit,
             },
+            'content_type': ContentType.objects.get_for_model(target_object),
+            'object': target_object,
         })
         return self._render(self.template_name, context, renderer)
 
@@ -32,10 +34,9 @@ class FineInput(ClearableFileInput):
         if bool(files) is True:  # suddenly files!
             return files
 
-        formid = data.get(self.formid_field_name, None)
-        if bool(formid) is True:
+        if getattr(self, 'target_object', None):
             return [
-                t.as_file() for t in Temporary.objects.filter(
-                    formid=formid, field_name=name)
+                t.as_file() for t in Attachment.objects.for_object(
+                    self.target_object, field_name=name)
             ]
         return None
