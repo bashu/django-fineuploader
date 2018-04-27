@@ -1,4 +1,5 @@
 <p align="center"><img src="logo/256.png" alt="django-fineuploader" height="200px"></p>
+
 django-fineuploader
 ===================
 
