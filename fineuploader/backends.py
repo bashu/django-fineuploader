@@ -7,7 +7,6 @@ try:
   from django.core.urlresolvers import get_callable
 except ModuleNotFoundError:
   from django.urls import get_callable
-from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 
 from .ajaxuploader.backends import local as backend
@@ -92,7 +91,7 @@ class FineUploadBackend(LocalUploadBackend):
 
             model_info = {
                 'original_filename': original_filename,
-                'owner': request.user if request.user.is_authenticated else None,
+                'creator': request.user,
                 'content_type': ContentType.objects.get_for_model(target_object.__class__),
                 'object_id': target_object.pk,
             }
@@ -101,10 +100,10 @@ class FineUploadBackend(LocalUploadBackend):
             if field_name:
                 model_info['field_name'] = field_name
 
-            a = Attachment(file_obj=None, uuid=request.POST['qquuid'], **model_info)
+            a = Attachment(attachment_file=None, uuid=request.POST['qquuid'], **model_info)
 
             with open(self._path, 'rb') as fh:
-                a.file_obj.save(original_filename, ContentFile(fh.read()), save=True)
+                a.attachment_file.save(original_filename, ContentFile(fh.read()), save=True)
             a.save()
 
             response.update({'newUuid': a.uuid})

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from django.urls import reverse
 from django.core import validators
 from django.core.exceptions import ValidationError
 

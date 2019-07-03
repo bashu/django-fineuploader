@@ -42,6 +42,7 @@ setup(
     install_requires=[
         'django-appconf',
         'django-positions',
+        'django-attachments',
         'pathlib',
     ],
     requires=[

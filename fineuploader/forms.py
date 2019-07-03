@@ -8,13 +8,14 @@ from django.contrib.contenttypes.models import ContentType
 
 from .formfields import FineFieldMixin
 from .models import Attachment, Temporary
-from .conf import settings
 
 
 class FineFormMixin(object):
     formid_field_name = 'formid'
 
     def __init__(self, *args, **kwargs):
+        self.request = kwargs.pop("request")
+
         if 'prefix' in kwargs and kwargs['prefix'] is not None:
             self.prefix = kwargs['prefix']
         
@@ -61,29 +62,29 @@ class FineFormMixin(object):
                         a.delete()
                     t.delete()
 
-    def handle_upload(self, target_object, request=None, *args, **kwargs):
+    def handle_upload(self, target_object, request, *args, **kwargs):
         for f in self.fields:
             if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
 
-            for file_obj in self.cleaned_data[f]:
-                self.save_attachment(target_object, file_obj, f, request,*args, **kwargs)
+            for attachment_file in self.cleaned_data[f]:
+                self.save_attachment(target_object, attachment_file, f, request,*args, **kwargs)
 
-    def save_attachment(self, target_object, file_obj, field_name, request, *args, **kwargs):
+    def save_attachment(self, target_object, attachment_file, field_name, request, *args, **kwargs):
         model_info = {
-            'original_filename': file_obj.name,
-            'owner': request.user if request and request.user.is_authenticated else None,
+            'original_filename': attachment_file.name,
+            'creator': request.user,
         }
             
         if field_name:
             model_info['field_name'] = field_name
 
         attachment, created = Attachment.objects.update_or_create(
-            uuid=file_obj.uuid,
+            uuid=attachment_file.uuid,
             content_type_id=ContentType.objects.get_for_model(target_object).pk,
             object_id=str(target_object.pk),
             defaults=model_info,
         )
         if created is True:
-            attachment.file_obj.save(file_obj.name, file_obj, save=False)
+            attachment.attachment_file.save(attachment_file.name, attachment_file, save=False)
         attachment.save()
