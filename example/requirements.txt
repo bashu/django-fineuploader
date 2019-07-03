@@ -1,5 +1,6 @@
 django
 django-appconf
 django-positions
+django-attachments
 easy_thumbnails
 pathlib
