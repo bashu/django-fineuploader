@@ -42,7 +42,7 @@ class LocalUploadBackend(backend.LocalUploadBackend):
         try:
             response = super(LocalUploadBackend, self).upload_complete(
                 request, filename, *args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             return self.failure(str(e), request)
 
         return response
@@ -109,7 +109,7 @@ class FineUploadBackend(LocalUploadBackend):
 
             response.update({'newUuid': a.uuid})
 
-        except Exception, e:
+        except Exception as e:
             return self.failure(str(e), request)
 
         response.update({
