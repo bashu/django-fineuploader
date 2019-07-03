@@ -3,6 +3,7 @@
 from django import forms
 from django.urls import reverse
 from django.views import generic
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 from fineuploader.forms import FineFormMixin
 from fineuploader.formfields import FineFileField
@@ -21,19 +22,27 @@ class ExampleForm(FineFormMixin, forms.ModelForm):
     def save(self, *args, **kwargs):
         obj = super(ExampleForm, self).save(commit=True)
 
-        self.handle_upload(obj)  # handle uploaded files
+        self.handle_upload(obj, self.request)  # handle uploaded files
 
         self.delete_temporary_files()  # deleting temporary files / objects
 
         return obj
 
 
-class ExampleCreateView(generic.CreateView):
+class FormKwargsRequestMixin(object):
+
+    def get_form_kwargs(self):
+        kwargs = super(FormKwargsRequestMixin, self).get_form_kwargs()
+        kwargs.update({'request': self.request})
+        return kwargs
+
+
+class ExampleCreateView(LoginRequiredMixin, FormKwargsRequestMixin, generic.CreateView):
     template_name = 'upload.html'
     form_class = ExampleForm
 
 
-class ExampleUpdateView(generic.UpdateView):
+class ExampleUpdateView(LoginRequiredMixin, FormKwargsRequestMixin, generic.UpdateView):
     template_name = 'upload.html'
     form_class = ExampleForm
     model = ExampleModel

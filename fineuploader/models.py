@@ -1,96 +1,52 @@
 # -*- coding: utf-8 -*-
 
-import os
-import uuid
 from datetime import timedelta
 
 from django.db import models
 from django.utils import timezone
 from django.core.files import File
-from django.core.urlresolvers import get_callable
 from django.utils.encoding import python_2_unicode_compatible
-from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
+from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import ugettext_lazy as _
 
+from attachments.models import Attachment as AttachmentBase
 from positions.fields import PositionField
 
 from .conf import settings
 from .managers import AttachmentManager
 
 
-def upload_path(instance, filename):
-    FILENAME_FUNCTION = getattr(
-        settings, 'FINEUPLOADER_FILENAME_FUNCTION', None)
-
-    func = FILENAME_FUNCTION
-    if func is None:
-        func = lambda x: x
-
-    if isinstance(func, str):
-        func = get_callable(func)
-
-    return os.path.join(
-        'attachments',
-        instance.content_object._meta.app_label,
-        instance.content_object._meta.object_name.lower(),
-        str(instance.content_object.pk),
-        func(filename),
-    )
-
-
 @python_2_unicode_compatible
-class Attachment(models.Model):
-
-    content_type = models.ForeignKey('contenttypes.ContentType', on_delete=models.CASCADE)
-    object_id = models.CharField(max_length=128)
-    content_object = GenericForeignKey('content_type', 'object_id')
+class Attachment(AttachmentBase):
 
     field_name = models.CharField(max_length=256, null=True, blank=True)
 
-    file_obj = models.FileField(_("file"), upload_to=upload_path)
     original_filename = models.CharField(_("original filename"), max_length=255, blank=True, null=True)
 
     # for internal use...
 
-    owner = models.ForeignKey(
-        getattr(settings, 'AUTH_USER_MODEL', 'auth.User'),
-        related_name='owned_%(class)ss', on_delete=models.SET_NULL,
-        null=True, blank=True, verbose_name=_('owner'),
-    )
-
     uuid = models.UUIDField()
 
     position = PositionField(_("order"), default=-1, collection=('object_id', 'content_type'))
-
-    timestamp = models.DateTimeField(default=timezone.now)
 
     objects = AttachmentManager()
 
     class Meta:
         verbose_name = _('attachment')
         verbose_name_plural = _('attachments')
-        unique_together = ['content_type', 'object_id', 'uuid']
-        ordering = ['-timestamp', 'position']
+        ordering = ['-created', 'position']
 
     def __str__(self):
-        if self.original_filename:
-            return self.original_filename
-        return str(self.file_obj.name)
-
-    def get_absolute_url(self):
-        return self.file_obj.url
+        return _('{username} attached {filename}').format(
+            username=self.creator.get_username(),
+            filename=self.original_filename if self.original_filename else self.attachment_file.name,
+        )
 
     def as_file(self):
         class AttachmentFile(File):
             uuid = str(self.uuid)
 
-        return AttachmentFile(self.file_obj, self.original_filename)
-
-    def delete(self, *args, **kwargs):
-        if self.file_obj and self.file_obj.storage.exists(self.file_obj.name):
-            self.file_obj.delete()
-
-        super(Attachment, self).delete(*args, **kwargs)
+        return AttachmentFile(self.attachment_file, self.original_filename)
 
 
 @python_2_unicode_compatible

@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import json
-
 from django.forms import ClearableFileInput
 from django.contrib.contenttypes.models import ContentType
 
@@ -36,7 +34,7 @@ class FineInput(ClearableFileInput):
 
         if getattr(self, 'target_object', None):
             return [
-                t.as_file() for t in Attachment.objects.for_object(
+                t.as_file() for t in Attachment.objects.attachments_for_object(
                     self.target_object, field_name=name)
             ]
         return None
