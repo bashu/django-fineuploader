@@ -46,10 +46,10 @@ class LocalUploadBackend(AbstractUploadBackend):
             while not unique_filename:
                 try:
                     if filename_suffix == 0:
-                        open(os.path.join(self._dir, filename))
+                        open(os.path.join(self._dir, filename), 'rb')
                     else:
                         filename_no_extension, extension = os.path.splitext(filename)
-                        open(os.path.join(self._dir, filename_no_extension + str(filename_suffix) + extension))
+                        open(os.path.join(self._dir, filename_no_extension + str(filename_suffix) + extension), 'rb')
                     filename_suffix += 1
                 except IOError:
                     unique_filename = True

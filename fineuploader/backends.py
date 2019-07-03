@@ -103,7 +103,7 @@ class FineUploadBackend(LocalUploadBackend):
 
             a = Attachment(file_obj=None, uuid=request.POST['qquuid'], **model_info)
 
-            with open(self._path) as fh:
+            with open(self._path, 'rb') as fh:
                 a.file_obj.save(original_filename, ContentFile(fh.read()), save=True)
             a.save()
 
