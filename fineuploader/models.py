@@ -7,7 +7,10 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.core.files import File
-from django.core.urlresolvers import get_callable
+try:
+  from django.core.urlresolvers import get_callable
+except ModuleNotFoundError:
+  from django.urls import get_callable
 from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.utils.translation import ugettext_lazy as _

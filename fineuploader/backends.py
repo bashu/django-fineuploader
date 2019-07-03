@@ -3,7 +3,10 @@
 import logging
 
 from django.core.files.base import ContentFile
-from django.core.urlresolvers import get_callable
+try:
+  from django.core.urlresolvers import get_callable
+except ModuleNotFoundError:
+  from django.urls import get_callable
 from django.core.exceptions import PermissionDenied
 from django.contrib.contenttypes.models import ContentType
 
