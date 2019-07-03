@@ -11,25 +11,27 @@ from .models import Attachment, Temporary
 
 
 class FineFormMixin(object):
-    formid_field_name = 'formid'
+    formid_field_name = "formid"
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop("request")
 
-        if 'prefix' in kwargs and kwargs['prefix'] is not None:
-            self.prefix = kwargs['prefix']
-        
-        if kwargs.get('initial', None) is None:
-            kwargs['initial'] = {}
-        if not self.add_prefix(self.formid_field_name) in kwargs['initial']:
-            kwargs['initial'].update({
-                self.add_prefix(self.formid_field_name): str(uuid.uuid4())})
+        if "prefix" in kwargs and kwargs["prefix"] is not None:
+            self.prefix = kwargs["prefix"]
+
+        if kwargs.get("initial", None) is None:
+            kwargs["initial"] = {}
+        if not self.add_prefix(self.formid_field_name) in kwargs["initial"]:
+            kwargs["initial"].update({self.add_prefix(self.formid_field_name): str(uuid.uuid4())})
         super(FineFormMixin, self).__init__(*args, **kwargs)
 
         self.fields[self.formid_field_name] = forms.CharField(
-            widget=forms.HiddenInput, initial=kwargs['initial'][self.add_prefix(self.formid_field_name)], required=False)
+            widget=forms.HiddenInput, initial=kwargs["initial"][self.add_prefix(self.formid_field_name)], required=False
+        )
 
-        formid = self.data.get(self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name)))
+        formid = self.data.get(
+            self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name))
+        )
         for f in self.fields:
             if not issubclass(self.fields[f].__class__, FineFieldMixin):
                 continue
@@ -37,8 +39,8 @@ class FineFormMixin(object):
             self.fields[f].widget.target_object = self.get_target_object(formid, f)
 
     def get_target_object(self, formid=None, field_name=None):
-        if hasattr(self, 'instance') is True:
-            if getattr(self.instance, 'pk', False):
+        if hasattr(self, "instance") is True:
+            if getattr(self.instance, "pk", False):
                 return self.instance
 
         # instance not found, trying to get temporary object...
@@ -50,7 +52,9 @@ class FineFormMixin(object):
         raise NotImplementedError  # something unexpected ?
 
     def delete_temporary_files(self):
-        formid = self.data.get(self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name)))
+        formid = self.data.get(
+            self.add_prefix(self.formid_field_name), self.initial.get(self.add_prefix(self.formid_field_name))
+        )
 
         if bool(formid) is True:
             for field_name, f in six.iteritems(self.fields):
@@ -68,16 +72,13 @@ class FineFormMixin(object):
                 continue
 
             for attachment_file in self.cleaned_data[f]:
-                self.save_attachment(target_object, attachment_file, f, request,*args, **kwargs)
+                self.save_attachment(target_object, attachment_file, f, request, *args, **kwargs)
 
     def save_attachment(self, target_object, attachment_file, field_name, request, *args, **kwargs):
-        model_info = {
-            'original_filename': attachment_file.name,
-            'creator': request.user,
-        }
-            
+        model_info = {"original_filename": attachment_file.name, "creator": request.user}
+
         if field_name:
-            model_info['field_name'] = field_name
+            model_info["field_name"] = field_name
 
         attachment, created = Attachment.objects.update_or_create(
             uuid=attachment_file.uuid,

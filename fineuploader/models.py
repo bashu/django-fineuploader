@@ -27,17 +27,17 @@ class Attachment(AttachmentBase):
 
     uuid = models.UUIDField()
 
-    position = PositionField(_("order"), default=-1, collection=('object_id', 'content_type'))
+    position = PositionField(_("order"), default=-1, collection=("object_id", "content_type"))
 
     objects = AttachmentManager()
 
     class Meta:
-        verbose_name = _('attachment')
-        verbose_name_plural = _('attachments')
-        ordering = ['-created', 'position']
+        verbose_name = _("attachment")
+        verbose_name_plural = _("attachments")
+        ordering = ["-created", "position"]
 
     def __str__(self):
-        return _('{username} attached {filename}').format(
+        return _("{username} attached {filename}").format(
             username=self.creator.get_username(),
             filename=self.original_filename if self.original_filename else self.attachment_file.name,
         )
@@ -61,9 +61,9 @@ class Temporary(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta(object):
-        verbose_name = _('temporary')
-        verbose_name_plural = _('temporary')
-        ordering = ['-timestamp']
+        verbose_name = _("temporary")
+        verbose_name_plural = _("temporary")
+        ordering = ["-timestamp"]
 
     def __str__(self):
         return self.formid
