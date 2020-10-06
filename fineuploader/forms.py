@@ -3,7 +3,10 @@
 import uuid
 
 from django import forms
-from django.utils import six
+try:
+    from django.utils import six
+except ImportError:
+    import six
 from django.contrib.contenttypes.models import ContentType
 
 from .formfields import FineFieldMixin
