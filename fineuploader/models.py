@@ -5,7 +5,6 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.core.files import File
-from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import ugettext_lazy as _
 
@@ -16,7 +15,6 @@ from .conf import settings
 from .managers import AttachmentManager
 
 
-@python_2_unicode_compatible
 class Attachment(AttachmentBase):
 
     field_name = models.CharField(max_length=256, null=True, blank=True)
@@ -49,7 +47,6 @@ class Attachment(AttachmentBase):
         return AttachmentFile(self.attachment_file, self.original_filename)
 
 
-@python_2_unicode_compatible
 class Temporary(models.Model):
 
     formid = models.CharField(max_length=128)
