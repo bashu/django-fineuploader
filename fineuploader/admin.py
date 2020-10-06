@@ -7,6 +7,6 @@ from .models import Attachment
 
 @admin.register(Attachment)
 class AttachmentAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'content_object', 'created')
-    list_filter = ('content_type',)
-    readonly_fields = ('uuid', 'field_name', 'created', 'modified')
+    list_display = ("__str__", "content_object", "created")
+    list_filter = ("content_type",)
+    readonly_fields = ("uuid", "field_name", "created", "modified")

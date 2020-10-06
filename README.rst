@@ -76,6 +76,54 @@ When deploying on production server, don't forget to run:
 Usage
 -----
 
+.. code-block:: python
+
+    # forms.py
+
+    from django import forms
+
+    from fineuploader.forms import FineFormMixin
+    from fineuploader.formfields import FineFileField
+
+    class ExampleForm(FineFormMixin, forms.ModelForm):
+
+        files = FineFileField(label="Files")
+
+        class Meta:
+            ...
+
+        def save(self, *args, **kwargs):
+            obj = super(ExampleForm, self).save(commit=True)
+
+            self.handle_upload(obj, self.request)  # handle uploaded files
+
+            self.delete_temporary_files()  # deleting temporary files / objects
+
+            return obj
+
+    # views.py
+
+    from django.views import generic
+    from django.contrib.auth.mixins import LoginRequiredMixin
+
+    class ExampleCreateView(LoginRequiredMixin, generic.CreateView):
+        form_class = ExampleForm  # our custom form class
+        ...
+
+        def get_form_kwargs(self):
+            kwargs = super(ExampleCreateView, self).get_form_kwargs()
+            kwargs.update({"request": self.request})  # must pass self.request into form
+            return kwargs
+
+    class ExampleUpdateView(LoginRequiredMixin, generic.UpdateView):
+        form_class = ExampleForm  # our custom form class
+        ...
+        
+        def get_form_kwargs(self):
+            kwargs = super(ExampleUpdateView, self).get_form_kwargs()
+            kwargs.update({"request": self.request})  # must pass self.request into form
+            return kwargs
+
 License
 -------
 

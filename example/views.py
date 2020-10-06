@@ -17,8 +17,8 @@ class ExampleForm(FineFormMixin, forms.ModelForm):
 
     class Meta:
         model = ExampleModel
-        fields = ['files']
-        
+        fields = ["files"]
+
     def save(self, *args, **kwargs):
         obj = super(ExampleForm, self).save(commit=True)
 
@@ -30,19 +30,18 @@ class ExampleForm(FineFormMixin, forms.ModelForm):
 
 
 class FormKwargsRequestMixin(object):
-
     def get_form_kwargs(self):
         kwargs = super(FormKwargsRequestMixin, self).get_form_kwargs()
-        kwargs.update({'request': self.request})
+        kwargs.update({"request": self.request})
         return kwargs
 
 
 class ExampleCreateView(LoginRequiredMixin, FormKwargsRequestMixin, generic.CreateView):
-    template_name = 'upload.html'
+    template_name = "upload.html"
     form_class = ExampleForm
 
 
 class ExampleUpdateView(LoginRequiredMixin, FormKwargsRequestMixin, generic.UpdateView):
-    template_name = 'upload.html'
+    template_name = "upload.html"
     form_class = ExampleForm
     model = ExampleModel

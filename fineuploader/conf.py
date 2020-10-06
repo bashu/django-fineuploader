@@ -9,4 +9,4 @@ class FineUploaderSettings(AppConf):
     TEMPORARY_AGE = 60 * 60 * 24 * 7  # default is one week
 
     class Meta:
-        prefix = 'fineuploader'
+        prefix = "fineuploader"

@@ -5,7 +5,6 @@ from datetime import timedelta
 from django.db import models
 from django.utils import timezone
 from django.core.files import File
-from django.utils.encoding import python_2_unicode_compatible
 from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import ugettext_lazy as _
 
@@ -16,7 +15,6 @@ from .conf import settings
 from .managers import AttachmentManager
 
 
-@python_2_unicode_compatible
 class Attachment(AttachmentBase):
 
     field_name = models.CharField(max_length=256, null=True, blank=True)
@@ -27,17 +25,17 @@ class Attachment(AttachmentBase):
 
     uuid = models.UUIDField()
 
-    position = PositionField(_("order"), default=-1, collection=('object_id', 'content_type'))
+    position = PositionField(_("order"), default=-1, collection=("object_id", "content_type"))
 
     objects = AttachmentManager()
 
     class Meta:
-        verbose_name = _('attachment')
-        verbose_name_plural = _('attachments')
-        ordering = ['-created', 'position']
+        verbose_name = _("attachment")
+        verbose_name_plural = _("attachments")
+        ordering = ["-created", "position"]
 
     def __str__(self):
-        return _('{username} attached {filename}').format(
+        return _("{username} attached {filename}").format(
             username=self.creator.get_username(),
             filename=self.original_filename if self.original_filename else self.attachment_file.name,
         )
@@ -49,7 +47,6 @@ class Attachment(AttachmentBase):
         return AttachmentFile(self.attachment_file, self.original_filename)
 
 
-@python_2_unicode_compatible
 class Temporary(models.Model):
 
     formid = models.CharField(max_length=128)
@@ -61,9 +58,9 @@ class Temporary(models.Model):
     timestamp = models.DateTimeField(default=timezone.now)
 
     class Meta(object):
-        verbose_name = _('temporary')
-        verbose_name_plural = _('temporary')
-        ordering = ['-timestamp']
+        verbose_name = _("temporary")
+        verbose_name_plural = _("temporary")
+        ordering = ["-timestamp"]
 
     def __str__(self):
         return self.formid
