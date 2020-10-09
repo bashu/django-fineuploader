@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from django import forms
-from django.urls import reverse
-from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views import generic
 
-from fineuploader.forms import FineFormMixin
 from fineuploader.formfields import FineFileField
+from fineuploader.forms import FineFormMixin
 
 from .models import ExampleModel
 

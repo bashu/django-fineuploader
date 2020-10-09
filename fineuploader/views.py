@@ -4,9 +4,10 @@ try:
     import json
 except ImportError:
     from django.utils import simplejson as json
-from django.core.serializers.json import DjangoJSONEncoder
+
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse, Http404, HttpResponseNotAllowed
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import Http404, HttpResponse, HttpResponseNotAllowed
 
 from .ajaxuploader.views import AjaxFileUploader
 from .backends import FineUploadBackend, get_target_object

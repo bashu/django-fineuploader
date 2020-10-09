@@ -8,11 +8,12 @@ try:
     from django.core.urlresolvers import get_callable
 except ModuleNotFoundError:
     from django.urls import get_callable
+
 from django.contrib.contenttypes.models import ContentType
 
 from .ajaxuploader.backends import local as backend
-from .models import Attachment, Temporary
 from .conf import settings
+from .models import Attachment, Temporary
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,8 @@ except ImportError:
     from django.utils import simplejson as json
 
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import (HttpResponse, HttpResponseBadRequest,
+                         HttpResponseNotAllowed)
 
 from .backends.local import LocalUploadBackend
 from .signals import file_uploaded

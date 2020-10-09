@@ -2,10 +2,10 @@
 
 from datetime import timedelta
 
+from django.contrib.contenttypes.fields import GenericRelation
+from django.core.files import File
 from django.db import models
 from django.utils import timezone
-from django.core.files import File
-from django.contrib.contenttypes.fields import GenericRelation
 from django.utils.translation import ugettext_lazy as _
 
 from attachments.models import Attachment as AttachmentBase

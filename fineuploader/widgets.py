@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.forms import ClearableFileInput
 from django.contrib.contenttypes.models import ContentType
+from django.forms import ClearableFileInput
 
 from .models import Attachment
 

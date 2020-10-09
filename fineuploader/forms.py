@@ -3,6 +3,7 @@
 import uuid
 
 from django import forms
+
 try:
     from django.utils import six
 except ImportError:

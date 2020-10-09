@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-from io import FileIO, BufferedWriter
+from io import BufferedWriter, FileIO
 
 from django.conf import settings
 
